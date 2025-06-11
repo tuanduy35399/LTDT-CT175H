@@ -1,0 +1,100 @@
+#include <stdio.h>
+#define oo 999999
+#define NO_EDGE 0
+#define MAX 50
+
+typedef struct {
+    int A[MAX][MAX];
+    int m, n;
+} Graph;
+
+// Các biến hỗ trợ
+int pi[MAX];
+int p[MAX];
+int mark[MAX];
+
+// Khởi tạo đồ thị
+void init_graph(Graph* pG, int n) {
+    pG->n = n;
+    pG->m = 0;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            pG->A[i][j] = NO_EDGE; // Khởi tạo không có cạnh
+        }
+    }
+}
+
+// Thêm cung có trọng số w
+void add_edge(Graph* pG, int u, int v, int w) {
+    pG->A[u][v] = w;
+    pG->m++;
+}
+
+void Dijkstra(Graph* pG, int s) {
+    int u, v;
+    // Khởi tạo
+    for (u = 1; u <= pG->n; u++) {
+        mark[u] = 0;
+        pi[u] = oo;
+        p[u] = -1;
+    }
+    pi[s] = 0;
+
+    for (int i = 1; i <= pG->n - 1; i++) { //day la so lan lap, khong phai tim v ke
+        //boi vi ta da duyet xong1 dinh roi thi duyet n-1 dinh con lai
+
+        int u = -1; //khoi tao bien u tam thoi de luu dinh luu dong
+        int min_pi = oo; //tao bien min_pi de luu tam thoi
+
+        for (int j = 1; j <= pG->n; j++) { //duyet qua cac dinh trong do thi
+            //Neu dinh nao da danh dau roi thi bo qua mark=1;
+            //Neu chua thi so sanh tiep toi pi cua no
+            /*Minh họa:
+            Giả sử: pi = [0, 10, oo, 7, 15], mark = [1, 0, 0, 1, 0] (đánh dấu đỉnh 1 và 4 đã chọn).
+            Trong vòng lặp tìm u: chỉ chọn giữa đỉnh 2, 3, 5.
+            Đỉnh 2 có pi=10, đỉnh 3 oo, đỉnh 5 15 → Chọn u=2 với min_pi=10.
+            */
+            if (mark[j] == 0 && pi[j] < min_pi) {
+                min_pi = pi[j];
+                u = j;
+            }
+        }
+        //Sau vong lap
+        //Neu tat ca deu da duoc danh dau het thi break; (u==-1)
+        if (u == -1)
+            break;
+
+        //Nguoc lai danh dau u duoc chon, luc nay u co pi nho nhat trong dam
+        mark[u] = 1;
+
+        //Tiep tuc xet cac v ke cua u
+        for (v = 1; v <= pG->n; v++)
+            //neu ma giua u va v co cung (!= NO_EDGE), v chua duoc danh dau, tong trong so va pi cua u < pi hien tai cua v
+            if (pG->A[u][v] != NO_EDGE && !mark[v] && pi[u] + pG->A[u][v] < pi[v]) {
+                //Tien hanh gan lai so moi nho hon
+                pi[v] = pi[u] + pG->A[u][v]; //pG->A[u][v] là trọng số của cung (u,v)
+                //Gan cha cua v = u
+                p[v] = u;
+            }
+    }
+}
+
+int main() {
+    Graph G;
+    int n, m, u, v, w, e;
+
+    scanf("%d%d", &n, &m);
+    init_graph(&G, n);
+
+    for (e = 0; e < m; e++) {
+        scanf("%d %d %d", &u, &v, &w);
+        add_edge(&G, u, v, w);
+    }
+
+    Dijkstra(&G, 1);
+
+    for (int i = 1; i <= n; i++) {
+        printf("pi[%d] = %d, p[%d] = %d\n", i, pi[i], i, p[i]);
+    }
+    return 0;
+}
