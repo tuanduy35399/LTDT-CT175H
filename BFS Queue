@@ -1,0 +1,96 @@
+#include <stdio.h>
+#define MAX 50
+
+typedef struct {
+	int u,v;
+}Edge;
+typedef struct {
+	int n, m;
+	Edge edges[MAX];
+}Graph;
+
+void init_graph(Graph* pG, int n) {
+	pG->n=n;
+	pG->m=0;
+}
+
+int adjacent(Graph* pG, int u, int v) {
+	for(int i=0; i<=pG->m; i++) {
+		if((pG->edges[i].u==u && pG->edges[i].v==v) ||
+		(pG->edges[i].u==v && pG->edges[i].v==u))	return 1;	
+}
+return 0;
+}
+void add_edge(Graph* pG, int u, int v) {
+    if(adjacent(pG, u,v)) return;
+	pG->edges[pG->m].u=u;
+	pG->edges[pG->m].v=v;
+	pG->m++;
+}
+
+typedef struct {
+    int data[MAX];
+    int front, rear,size;
+}Queue;
+
+void make_null(Queue* pQ) {
+    pQ->front=0;
+    pQ->rear=-1;
+    pQ->size=0;
+}
+int empty(Queue* pQ) {
+    return pQ->size==0;
+}
+int full(Queue* pQ) {
+    return pQ->size==MAX;
+}
+int front(Queue* pQ) {
+    if(empty(pQ)) return -1;
+    return pQ->data[pQ->front];
+}
+void enqueue(Queue* pQ, int x) {
+    if(full(pQ)) return;
+    pQ->rear=(pQ->rear+1)%MAX;
+    pQ->data[pQ->rear]=x;
+    pQ->size++;
+}
+void dequeue(Queue* pQ) {
+    if(empty(pQ)) return;
+    pQ->front=(pQ->front+1)%MAX;
+    pQ->size--;
+}
+int mark[MAX];
+
+
+void BFS(Graph* pG, int x) {
+    Queue  Q; make_null(&Q);
+    enqueue(&Q, x);
+    while(!empty(&Q)) {
+        int u=front(&Q); dequeue(&Q);
+        if(mark[u]!=0) continue;
+        mark[u]=1;
+        printf("%d\n", u);
+        for(int v=1; v<=pG->n; v++) {
+            if(adjacent(pG, u, v)) {
+                enqueue(&Q, v);
+            }
+        }
+    }
+}
+int main() {
+	int n, m, u, v;
+	scanf("%d %d", &n, &m);
+	Graph G; init_graph(&G, n);
+	for(int i=1; i<=m ; i++) {
+		scanf("%d %d", &u, &v);
+		add_edge(&G,u,v);
+	}
+	for(int i=1; i<=n; i++) {
+		mark[i]=0;
+	}
+	for(int i=1; i<=n; i++) {
+		if(mark[i]==0) BFS(&G, i);
+	}
+	
+	return 0;
+}
