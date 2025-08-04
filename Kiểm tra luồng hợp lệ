@@ -1,0 +1,91 @@
+Cho mạng được biểu diễn bằng đồ thị n đỉnh, m cung. Đỉnh phát s = 1 và đỉnh thu t = n. Mỗi cung (u, v) có khả năng thông qua là C[u][v] và luồng đi qua nó là F[u][v]. Để tìm luồng lớn nhất trên mạng bằng giải thuật Ford - Fulkerson, ta phải khởi tạo một luồng hợp lệ nào đó trên mạng và sau đó tìm cách tăng luồng.
+
+Luồng hợp lệ phải thoả mãn các yêu cầu sau:
+
+0 <= F[u][v] <= C[u][v], với mọi cung (u, v)
+Tổng luồng đi ra khỏi đỉnh s = Tổng luồng đi vào đỉnh t
+Tổng luồng đi vào đỉnh u = Tổng luồng đi ra khỏi u (u khác s và u khác t)
+Luồng tầm thường (trivial flow) là luồng có F[u][v] = 0 với mọi cung (u,v). Dĩ nhiên luồng tầm thường là luồng hợp lệ.
+
+Giả sử người ta đã khởi tạo giá trị cho các luồng F[u][v] trên mạng, hãy viết chương trình kiểm tra xem luồng khởi tạo có hợp lệ không.
+
+Đầu vào (Input)
+
+Dữ liệu đầu vào được nhập từ bàn phím với định dạng:
+
+Dòng đầu tiên chứa 2 số nguyên n và m, tương ứng là số đỉnh và số cung.
+m dòng tiếp theo mỗi dòng chứa 3 số nguyên u v c f mô tả cung (u, v) có khả năng thông qua c và luồng khởi tạo f.
+Đầu ra (Output):
+
+Nếu luồng khởi tạo của mạng hợp lệ, in ra màn hình YES, ngược lại in ra NO.
+Xem thêm ví dụ trong phần For example.
+
+For example:
+
+Input	
+3 3  
+1 2 9 0
+2 3 4 0
+1 3 4 0
+Result
+YES
+///////////////
+Input	
+3 3  
+1 2 9 3
+2 3 4 3
+1 3 4 1
+Result
+YES
+
+#include <stdio.h>
+#include <string.h>
+
+#define MAX 505
+
+int n, m;
+int C[MAX][MAX]; 
+int F[MAX][MAX];  
+int in[MAX];     
+int out[MAX];     
+
+int main() {
+    scanf("%d %d", &n, &m);
+
+    memset(C, 0, sizeof(C));
+    memset(F, 0, sizeof(F));
+    memset(in, 0, sizeof(in));
+    memset(out, 0, sizeof(out));
+
+    int u, v, c, f;
+    for (int i = 0; i < m; ++i) {
+        scanf("%d %d %d %d", &u, &v, &c, &f);
+        if (f < 0 || f > c) {
+            printf("NO\n");
+            return 0;
+        }
+        C[u][v] = c;
+        F[u][v] = f;
+        out[u] += f;
+        in[v] += f;
+    }
+
+    int s = 1, t = n;
+    for (int u = 1; u <= n; ++u) {
+        if (u != s && u != t) {
+            if (in[u] != out[u]) {
+                printf("NO\n");
+                return 0;
+            }
+        }
+    }
+
+    if (out[s] != in[t]) {
+        printf("NO\n");
+        return 0;
+    }
+
+    printf("YES\n");
+    return 0;
+}
+
