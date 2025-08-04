@@ -1,0 +1,196 @@
+Viết chương trình tìm luồng cực đại trên mạng bằng thuật toán Ford - Fulkerson (duyệt theo chiều rộng).
+
+Đầu vào (Input)
+
+Dữ liệu đầu vào được nhập từ bàn phím với định dạng:
+
+Dòng đầu tiên chứa 2 số nguyên n và m, tương ứng là số đỉnh và số cung.
+m dòng tiếp theo mỗi dòng chứa 3 số nguyên u, v, w mô tả cung (u, v) có trọng số w.
+Đầu ra (Output)
+
+In ra màn hình theo định dạng sau:
+
+Dòng đầu tiên in luồng cực đại theo dạng: Max flow: f với f là giá trị luồng cực đại
+Dòng thứ hai in các đỉnh của S theo dạng: S: x1 x2 ..., mỗi đỉnh cách nhau 1 khoảng trắng. In các đỉnh theo thứ tự từ nhỏ đến lớn.
+Dòng thứ ba in các đỉnh của T theo dạng: T: y1 y2 ..., mỗi đỉnh cách nhau 1 khoảng trắng. In các đỉnh theo thứ tự từ nhỏ đến lớn.
+Xem thêm ví dụ trong phần For example.
+
+For example:
+
+Input	
+3 3  
+1 2 9
+2 3 4
+1 3 4
+Result
+Max flow: 8
+S: 1 2
+T: 3
+
+
+#include <stdio.h>
+
+typedef struct {
+    int C[100][100];
+    int F[100][100];
+    int m, n;
+    int s, t;
+} Network;
+
+
+int min(int a, int b) {
+    return a < b ? a : b;
+}
+
+#define MAX_LENGTH 100
+typedef struct {
+    int data[MAX_LENGTH];
+    int front, rear;
+} Queue;
+
+void makeNullQueue(Queue * pQ) {
+    pQ->front = pQ->rear = -1;
+}
+
+void enqueue(int x, Queue *pQ) {
+    pQ->rear = (pQ->rear + 1) % MAX_LENGTH;
+    pQ->data[pQ->rear] = x;
+    if (pQ->front == -1)
+        pQ->front = 0;
+}
+
+
+void dequeue(Queue *pQ) {
+    if (pQ->front == pQ->rear)
+        makeNullQueue(pQ);
+    else {
+        pQ->front = (pQ->front + 1) % MAX_LENGTH;
+    }
+}
+
+int empty(Queue *pQ) {
+    return pQ->front == -1;
+}
+
+
+int front(Queue *pQ) {
+    return pQ->data[pQ->front];
+}
+
+
+#define oo 9999999
+
+void init_network(Network *pN, int n) {
+    pN->n = n;
+    for (int u = 1; u <= pN->n; u++)
+        for (int v = 1; v <= pN->n; v++)
+            pN->C[u][v] = 0;
+}
+
+int d[100];
+int p[100];
+int sigma[100];
+
+int findPath(Network *pN) {
+    int s = pN->s;
+    int t = pN->t;
+
+    for (int u = 1; u <= pN->n; u++)
+        d[u] = 0;
+
+    d[s] = +1;
+    p[s] = s;
+    sigma[s] = oo;
+    
+    Queue Q;
+    makeNullQueue(&Q);
+    enqueue(s, &Q);
+    while(!empty(&Q)) {
+        int u = front(&Q);
+        dequeue(&Q);
+        for (int v = 1; v <= pN->n; v++)
+            if (d[v] == 0 && pN->C[u][v] > 0 && pN->F[u][v] < pN->C[u][v]) {
+                d[v] = +1;
+                p[v] = u;
+                sigma[v] = min(sigma[u], pN->C[u][v] - pN->F[u][v]);
+                enqueue(v, &Q);
+            }
+
+        for (int x = 1; x <= pN->n; x++)
+            if (d[x] == 0 && pN->C[x][u] > 0 && pN->F[x][u] > 0) {
+                d[x] = -1;
+                p[x] = u;
+                sigma[x] = min(sigma[u], pN->F[x][u]);
+                enqueue(x, &Q);
+            }
+        
+        if (d[t] != 0)
+            return 1; //path found
+    }
+    
+    return 0; // no path found
+}
+
+void EdmondsKarp(Network *pN) {
+    for (int u = 1; u <= pN->n; u++)
+        for (int v = 1; v <= pN->n; v++)
+            pN->F[u][v] = 0;
+    
+    int s = pN->s;
+    int t = pN->t;
+    int max_flow = 0;
+    while (1) {
+        if (!findPath(pN))
+            break;
+        
+        int sig = sigma[t];
+        max_flow += sig;
+        
+        int u = t;
+        while (u != s) {
+            int pu = p[u];
+            if (d[u] > 0)
+                pN->F[pu][u] += sig;
+            else
+                pN->F[u][pu] -= sig;
+            u = pu;
+        }
+    }
+    
+    //in ket qua
+    printf("Max flow: %d\n", max_flow);
+    printf("S:");
+    for (int u = 1; u <= pN->n; u++) {
+        if (d[u] != 0)
+            printf(" %d", u);
+    }
+    printf("\n");
+
+    printf("T:");
+    for (int u = 1; u <= pN->n; u++) {
+        if (d[u] == 0)
+            printf(" %d", u);
+    }
+    printf("\n");
+}
+
+
+
+int main() {
+    Network N;
+    int n, m;
+    scanf("%d%d", &n, &m);
+    init_network(&N, n);
+    for (int e = 0; e < m; e++) {
+        int u, v, c;
+        scanf("%d%d%d", &u, &v, &c);    
+        N.C[u][v] = c;
+    }
+    
+    N.s = 1;
+    N.t = n;
+    
+    EdmondsKarp(&N);
+    
+    return 0;
+}
