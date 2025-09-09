@@ -7,6 +7,6 @@
 ### Thuật toán Tìm đường đi ngắn nhất (cơ bản, nâng cao)
 ### Thuật toán Minimum Spanning Tree (Kruskal, Prim)
 ### Luồng cực đại trên mạng Max Flow
-![Điểm Lý thuyết đồ thị] <img width="1206" height="52" alt="image" src="https://github.com/user-attachments/assets/8b8178d3-4156-4746-9d4f-69f8c85fe2e5" />
-
-
+## Nhả vía điểm Lý Thuyết Đồ Thị
+<img width="1206" height="52" alt="image" src="https://github.com/user-attachments/assets/8b8178d3-4156-4746-9d4f-69f8c85fe2e5" />
+## 🍀Chúc bạn may mắn 🍀
